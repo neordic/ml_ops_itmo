@@ -1,0 +1,91 @@
+name: CI Pipe
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+
+    - name: Install Poetry
+      run:
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+
+    - name: Install dependencies
+      run: poetry install --with dev
+
+    - name: Run linters
+      run: |
+        poetry run ruff format --check .
+        poetry run ruff check .
+
+    - name: Build Docker image
+      run: docker build -t ml_ops_itmo .
+
+    - name: Build python package (wheel/sdist)
+      run: poetry build
+
+    - name: Upload dist as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: dist
+        path: dist/
+
+  publish-docker:
+    needs: lint-and-build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Log in
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Build and push Docker image
+      run: |
+        IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/ml-ops-itmo:latest
+        docker build -t $IMAGE_NAME .
+        docker push $IMAGE_NAME
+
+  pages:
+
+    if: github.ref == 'refs/heads/main'
+    needs: lint-and-build
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Generate minimal site
+        run: |
+          mkdir -p site
+          echo "<h1>Titanic MLOps</h1><p>Build: ${GITHUB_SHA}</p>" > site/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,32 @@
+[project]
+name = "titanic"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "neordic",email = "nmuraveva08@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas (>=2.3.2,<3.0.0)",
+    "scikit-learn (>=1.7.2,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.13.0"
+pre-commit = "^4.3.0"
+
+[tool.ruff]
+line-length = 88
+indent-width = 4
+target-version = "py312"   # или "py311" под твою версию
+exclude = [".venv", ".git", "dist", "build", ".ruff_cache"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+ignore = ["E203"]
