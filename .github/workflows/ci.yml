@@ -20,11 +20,10 @@ jobs:
         python-version: "3.12"
 
     - name: Install Poetry
-      run: pip install "poetry==1.8.3"
-
+      run: pip install poetry
 
     - name: Install dependencies
-      run: poetry install --with dev --no-interaction --no-ansi
+      run: poetry install --with dev
 
     - name: Run linters
       run: |
@@ -32,7 +31,7 @@ jobs:
         poetry run ruff check .
 
     - name: Build Docker image
-      run: docker build -t ml_ops_itmo .
+      run: docker build --progress=plain -t ml_ops_itmo .
 
     - name: Build python package (wheel/sdist)
       run: poetry build

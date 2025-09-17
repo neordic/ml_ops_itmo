@@ -7,6 +7,6 @@ ENV PATH="/root/.local/bin:${PATH}"
 
 COPY . .
 
-RUN poetry install
+RUN poetry install --with dev
 
 CMD ["poetry", "run", "python", "titanic/train.py"]
