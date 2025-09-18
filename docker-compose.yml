@@ -76,6 +76,11 @@ x-airflow-common:
     # for other purpose (development, test and especially production usage) build/extend Airflow image.
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
 
+    MLFLOW_TRACKING_URI: 'file:/app/airflow/mlruns'
+    MLFLOW_EXPERIMENT_NAME: 'mlops_itmo'
+
+    MPLBACKEND: Agg
+
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/app/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/data:/app/airflow/data
@@ -84,6 +89,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/results:/app/airflow/results
     - ${AIRFLOW_PROJ_DIR:-.}/.dvc:/app/airflow/.dvc
     - ${AIRFLOW_PROJ_DIR:-.}/.git:/app/airflow/.git
+    - ${AIRFLOW_PROJ_DIR:-.}/mlruns:/app/airflow/mlruns
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -214,6 +220,8 @@ services:
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
+
+
     user: "0:0"
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}:/sources
