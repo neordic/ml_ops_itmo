@@ -1,0 +1,6 @@
+outs:
+- md5: 2420d1bea53b20268726197f3e6a9197
+  size: 1439
+  hash: md5
+  path: logreg_fe.pkl
+  isexec: true

@@ -1,1 +1,6 @@
 .ruff_cache/
+.airflow/custom_logs/*
+.airflow/dags/__pycache__/
+logs
+custom_logs
+.old
