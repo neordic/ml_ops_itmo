@@ -1,4 +1,6 @@
 [core]
-    remote = gdrive
+    remote = origin-dags
 ['remote "gdrive"']
     url = gdrive://17RltLwsgLCoBv2C04mLtnpLokcwKW12Z
+['remote "origin-dags"']
+    url = https://dagshub.com/nmuraveva08/ml_ops_itmo.dvc
