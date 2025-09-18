@@ -1,0 +1,5 @@
+outs:
+- md5: 7f81468035533c710c4dd72731515331
+  size: 34328
+  hash: md5
+  path: mlp_simple.pkl
