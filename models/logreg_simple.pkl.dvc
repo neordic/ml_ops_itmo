@@ -1,5 +1,6 @@
 outs:
-- md5: 9562c7a2a51d1ee4ca6de48799533173
+- md5: 960749c3ab2358d626024389750dfeed
   size: 1263
   hash: md5
   path: logreg_simple.pkl
+  isexec: true
