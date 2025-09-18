@@ -1,0 +1,31 @@
+zabbix_export:
+  version: '6.4'
+  template_groups:
+    - uuid: a571c0d144b14fd4a87a9d9b2aa9fcd6
+      name: Templates/Applications
+  templates:
+    - uuid: a615dc391a474a9fb24bee9f0ae57e9e
+      template: 'Airflow by HTTP'
+      name: 'Airflow by HTTP'
+      groups:
+        - name: Templates/Applications
+      items:
+        - uuid: a987740f59d54b57a9201f2bc2dae8dc
+          name: 'Airflow: ping service'
+          type: HTTP_AGENT
+          key: airflow.ping
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.scheduler.status
+          url: 'http://{HOST.HOST}:8080/health'
+          triggers:
+            - uuid: f0b3fcbe4f5a43329c07992be93788cd
+              expression: 'last(/Airflow by HTTP/airflow.ping)<>"healthy"'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Airflow by HTTP/airflow.ping)="healthy"'
+              name: 'Airflow: scheduler is down'
+              priority: DISASTER
+              manual_close: 'YES'
