@@ -1,32 +1,28 @@
-[project]
+[tool.poetry]
 name = "titanic"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "neordic",email = "nmuraveva08@gmail.com"}
-]
+authors = ["neordic <nmuraveva08@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "pandas>=2.3.2,<3.0.0",
-    "scikit-learn>=1.5.2,<2.0.0"
-]
 
-
-[build-system]
-requires = ["poetry-core>=2.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+pandas = "^2.2.2"
+scikit-learn = "^1.5.2"
+joblib = "^1.4.2"
+dvc = {version = "^3.63.0", extras = ["http"]}
+matplotlib = "^3.9.0"
+seaborn = "^0.13.2"
+cryptography = "^43.0.0"
+certifi = "^2024.8.30"
+urllib3 = "^2.2.2"
+pyopenssl = "^24.2.1"
+mlflow = "^3.4.0"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.13.0"
-pre-commit = "^4.3.0"
+ruff = "^0.5.0"
+pre-commit = "^3.7.1"
 
-[tool.ruff]
-line-length = 88
-indent-width = 4
-target-version = "py312"   # или "py311" под твою версию
-exclude = [".venv", ".git", "dist", "build", ".ruff_cache"]
-
-[tool.ruff.lint]
-select = ["E", "F", "I"]
-ignore = ["E203"]
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,6 @@
+outs:
+- md5: bcb3078bedb4ffc70e7e9cd88c71b64d
+  size: 9003225
+  hash: md5
+  path: rf_simple.pkl
+  isexec: true

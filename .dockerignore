@@ -1,4 +1,5 @@
-.git
+!.git
+!.dvc
 .github
 .venv
 .__pycache__

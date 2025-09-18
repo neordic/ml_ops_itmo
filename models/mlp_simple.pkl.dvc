@@ -1,0 +1,6 @@
+outs:
+- md5: 1f67e9baee19d1bdfccf341000833692
+  size: 34328
+  hash: md5
+  path: mlp_simple.pkl
+  isexec: true
