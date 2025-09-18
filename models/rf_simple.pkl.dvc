@@ -1,0 +1,5 @@
+outs:
+- md5: 7a72e32729e65efc28423038b7b81038
+  size: 9003193
+  hash: md5
+  path: rf_simple.pkl
