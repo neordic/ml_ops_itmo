@@ -139,3 +139,10 @@ FE-модели
 | logreg_fe  | 59.459     | 60.020     | 1160.351| 0.9330   | 0.9091| data/raw/gender_submission.csv|
 
 (можно глянуть в results\api_benchmark.csv)
+
+# hw_6
+
+- развернуты graphana и prometheus
+- пара метрик на дашборде для примера
+
+![metrics](pics\dashboard.png)

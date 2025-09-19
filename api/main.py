@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Response
 from pydantic import BaseModel
 from typing import List, Dict
 from pathlib import Path
@@ -7,6 +7,20 @@ import yaml
 import subprocess
 import pandas as pd
 import joblib
+
+import time
+
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+
+REQ_LATENCY = Histogram(
+    "api_request_latency_seconds",
+    "Latency of /predict by model",
+    ["model"],
+    buckets=(0.01, 0.02, 0.05, 0.1, 0.2, 0.4, 1.0, 2.0),
+)
+REQ_TOTAL = Counter(
+    "api_requests_total", "Requests count by model/status", ["model", "status"]
+)
 
 app = FastAPI(title="Titanic API", version="1.0.0")
 
@@ -121,24 +135,57 @@ class PredictResponse(BaseModel):
     probabilities: List[float] | None = None
 
 
+@app.get("/metrics")
+def metrics():
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+
 @app.get("/health")
 def health():
     return {"status": "ok", "default_model": DEFAULT_KEY, "available": list(MODELS_CFG)}
 
 
+# @app.post("/predict", response_model=PredictResponse)
+# def predict(req: PredictRequest, model: str = Query(default=DEFAULT_KEY)):
+#     if model not in MODELS_CFG:
+#         raise HTTPException(400, f"unknown model key: {model}")
+#     try:
+#         df = pd.DataFrame(req.records)
+#     except Exception as e:
+#         raise HTTPException(400, f"bad payload: {e}")
+
+
+#     X = to_model_X(df, model)
+#     obj = ensure_model_loaded(model)
+#     mdl = obj["model"]
+#     proba = getattr(mdl, "predict_proba", None)
+#     probs = mdl.predict_proba(X)[:, 1].tolist() if proba else None
+#     preds = mdl.predict(X).tolist()
+#     return {"predictions": preds, "probabilities": probs}
 @app.post("/predict", response_model=PredictResponse)
 def predict(req: PredictRequest, model: str = Query(default=DEFAULT_KEY)):
-    if model not in MODELS_CFG:
-        raise HTTPException(400, f"unknown model key: {model}")
+    t0 = time.perf_counter()
     try:
-        df = pd.DataFrame(req.records)
-    except Exception as e:
-        raise HTTPException(400, f"bad payload: {e}")
+        if model not in MODELS_CFG:
+            REQ_TOTAL.labels(model=model, status="400").inc()
+            raise HTTPException(400, f"unknown model key: {model}")
 
-    X = to_model_X(df, model)
-    obj = ensure_model_loaded(model)
-    mdl = obj["model"]
-    proba = getattr(mdl, "predict_proba", None)
-    probs = mdl.predict_proba(X)[:, 1].tolist() if proba else None
-    preds = mdl.predict(X).tolist()
-    return {"predictions": preds, "probabilities": probs}
+        df = pd.DataFrame(req.records)
+        X = to_model_X(df, model)
+        obj = ensure_model_loaded(model)
+        mdl = obj["model"]
+        proba = getattr(mdl, "predict_proba", None)
+        probs = mdl.predict_proba(X)[:, 1].tolist() if proba else None
+        preds = mdl.predict(X).tolist()
+
+        REQ_TOTAL.labels(model=model, status="200").inc()
+        return {"predictions": preds, "probabilities": probs}
+
+    except HTTPException:
+        REQ_TOTAL.labels(model=model, status="400").inc()
+        raise
+    except Exception as e:
+        REQ_TOTAL.labels(model=model, status="500").inc()
+        raise HTTPException(500, str(e))
+    finally:
+        REQ_LATENCY.labels(model=model).observe(time.perf_counter() - t0)
