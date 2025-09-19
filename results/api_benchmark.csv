@@ -1,0 +1,6 @@
+model,n,batch,lat_p50_ms,lat_p95_ms,rps,accuracy,f1,source_csv,labels
+rf_simple,418,64,157.623,163.238,88.371,0.8206,0.7588,data/raw/test.csv,data/raw/gender_submission.csv
+rf_simple,418,64,157.301,161.643,373.515,0.8206,0.7588,data/raw/test.csv,data/raw/gender_submission.csv
+rf_simple,418,64,177.414,197.859,319.639,0.8206,0.7588,data/raw/test.csv,data/raw/gender_submission.csv
+mlp_simple,418,64,60.041,61.701,1082.522,0.9402,0.9206,data/raw/test.csv,data/raw/gender_submission.csv
+logreg_fe,418,64,59.459,60.02,1160.351,0.933,0.9091,data/raw/test.csv,data/raw/gender_submission.csv

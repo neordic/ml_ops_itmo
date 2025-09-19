@@ -1,0 +1,38 @@
+# Dockerfile.api
+FROM python:3.12-slim
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DEFAULT_TIMEOUT=120
+
+# dvc + сборка pygit2
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl ca-certificates \
+    build-essential python3-dev pkg-config \
+    libgit2-dev libssl-dev libffi-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 - \
+ && ln -s /root/.local/bin/poetry /usr/local/bin/poetry
+
+# Манифесты для кеша слоёв
+COPY pyproject.toml poetry.lock* /app/
+
+# Runtime-зависимости (venv внутри контейнера)
+RUN poetry config virtualenvs.create true \
+ && poetry install --only main --no-interaction --no-ansi --no-root
+
+# DVC CLI (при необходимости поменяй на dvc[s3] или dvc[ssh])
+RUN poetry run pip install "dvc>=3"
+# RUN poetry run pip install "dvc[s3]>=3"
+# RUN poetry run pip install "dvc[ssh]>=3"
+
+# Код
+COPY . /app
+
+EXPOSE 8000
+
+CMD ["poetry", "run", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

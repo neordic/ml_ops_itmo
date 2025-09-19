@@ -1,0 +1,21 @@
+# api/config.yaml
+default_model: rf_simple
+
+models:
+  rf_simple:
+    dvc_path: models/rf_simple.pkl
+    git_rev: HEAD
+    preset: simple
+    drop_if_present: ["PassengerId", "Survived"]
+
+  logreg_fe:
+    dvc_path: models/logreg_fe.pkl
+    git_rev: HEAD
+    preset: fe
+    drop_if_present: ["PassengerId", "Survived"]
+
+  mlp_simple:
+    dvc_path: models/mlp_simple.pkl
+    git_rev: HEAD
+    preset: simple
+    drop_if_present: ["PassengerId", "Survived"]

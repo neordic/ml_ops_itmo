@@ -149,7 +149,7 @@ services:
   airflow-init:
     <<: *airflow-common
     entrypoint: /bin/bash
-    # yamllint disable rule:line-length
+
     command:
       - -c
       - |
@@ -212,7 +212,7 @@ services:
         mkdir -p /sources/logs
         chown -R "${AIRFLOW_UID}:0" /sources/{logs, dags}
         exec /entrypoint airflow version
-    # yamllint enable rule:line-length
+
     environment:
       <<: *airflow-common-env
       _AIRFLOW_DB_MIGRATE: 'true'
@@ -225,6 +225,36 @@ services:
     user: "0:0"
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}:/sources
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: titanic_api
+    environment:
+      API_CONFIG: api/config.yaml
+      MODEL_KEY: rf_simple
+      DAGSHUB_USER: ${DAGSHUB_USER:-}
+      DAGSHUB_TOKEN: ${DAGSHUB_TOKEN:-}
+    volumes:
+      - .:/app
+    ports:
+      - "8001:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    command: >
+      bash -lc "
+        if [ -n \"${DAGSHUB_USER}\" ] && [ -n \"${DAGSHUB_TOKEN}\" ]; then
+          dvc remote modify --local origin-dags auth basic || true &&
+          dvc remote modify --local origin-dags user \"$DAGSHUB_USER\" || true &&
+          dvc remote modify --local origin-dags password \"$DAGSHUB_TOKEN\" || true ;
+        fi ;
+        poetry run uvicorn api.main:app --host 0.0.0.0 --port 8000
+      "
+    restart: unless-stopped
+
 
 volumes:
   postgres-db-volume:
